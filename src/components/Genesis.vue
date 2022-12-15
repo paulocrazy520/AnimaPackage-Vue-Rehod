@@ -3,7 +3,7 @@
   background-color: #34375e;
   border: 1px none;
   height: 1024px;
-  padding: 76px 15px;
+  padding: 10px 15px;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -30,7 +30,8 @@
   margin-top: 16px; */
   min-height: 66px;
   width: 320px;
-  height: 30%
+  margin-bottom: 50px;
+  /* height: 30% */
 }
 
 .label {
@@ -82,6 +83,13 @@
   width: 161px;
 }
 
+.first-button {
+  position: fixed;
+  left: 50px;
+  top: 30px;
+  box-shadow: 0px 1px 2px #10b1da0d;
+}
+
 .button:hover {
   background-color: #ffff00;
   box-shadow: 0px 1px 2px #c711af0d;
@@ -98,68 +106,201 @@
 .middle-screen {
   display: flex;
   flex-direction: column;
-  height: 30%;
+  align-items: center;
+  height: 60%;
 }
 
 .bottom-screen {
+  position: fixed;
+  bottom: 20px;
   width: 80%;
-  height: 30%;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+}
+
+.genesis h1 {
+  color: wheat;
+  font-size: 50px;
+  font-style: bold;
+  margin-bottom: 20px;
+}
+
+.ocrList {
+  padding: 20px;
+  margin-top: 50px;
+  width: 50%;
+  display: list-item;
+}
+
+.lastDiv {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.lastDiv .stakingInput {
+  width: 200px;
+  font-size: 30px;
+  margin-bottom: 150px;
 }
 </style>
 <template>
   <div class="container-center-horizontal">
     <div class="genesis screen">
+      <h1>Page Number : {{ count }}</h1>
       <img class="line-1" :src="line1" alt="Line 1" />
-      <div class="input-field">
-        <div class="label roboto-medium-white-14px">
-          <span class="roboto-medium-white-14px">{{ spanText1 }}</span>
-        </div>
-        <div class="input">
-          <div class="text roboto-normal-pale-sky-16px">
-            <span class="roboto-normal-pale-sky-16px">{{ spanText2 }}</span>
-          </div>
-          <div class="help-icon" :style="{ 'background-image': 'url(' + helpIcon + ')' }"></div>
-        </div>
-      </div>
+
       <div class="middle-screen">
-        <div class="button">
-          <div class="text-1 roboto-semi-bold-oxford-blue-14px">
-            <span class="roboto-semi-bold-oxford-blue-14px">{{ spanText3 }}</span>
+        <div class="button" v-if="count == 1">
+          <div class="text-1 roboto-semi-bold-oxford-blue-14px" @click='create'>
+            <span class="roboto-semi-bold-oxford-blue-14px">Create</span>
+          </div>
+        </div>
+        <div class="button" v-if="(count == 2 || count == 3)">
+          <div class="text-1 roboto-semi-bold-oxford-blue-14px" @click='ocr'>
+            <span class="roboto-semi-bold-oxford-blue-14px">OCR</span>
+          </div>
+        </div>
+        <div class="ocrList" v-if="count == 3">
+          <div>
+            <h1 class="ocrLabel">{{ ocrData[0] }}</h1>
+          </div>
+          <div>
+            <h1 class="ocrLabel">{{ ocrData[1] }}</h1>
+          </div>
+          <div>
+            <h1 class="ocrLabel">{{ ocrData[2] }}</h1>
+          </div>
+          <div>
+            <h1 class="ocrLabel">{{ ocrData[3] }}</h1>
+          </div>
+        </div>
+        <div class="button" v-if="count == 3">
+          <div class="text-1 roboto-semi-bold-oxford-blue-14px" @click='ocrConfirm'>
+            <span class="roboto-semi-bold-oxford-blue-14px">Confirm</span>
+          </div>
+        </div>
+        <div class="lastDiv" v-if="count == 4">
+          <input id="staking" class="stakingInput" />
+          <div class="button">
+            <div class="text-1 roboto-semi-bold-oxford-blue-14px" @click='stakingOk'>
+              <span class="roboto-semi-bold-oxford-blue-14px">Confirm</span>
+            </div>
           </div>
         </div>
       </div>
+
       <div class="bottom-screen">
         <div class="button">
-          <button class="text-1 roboto-semi-bold-oxford-blue-14px" @click='prev'>
+          <div class="text-1 roboto-semi-bold-oxford-blue-14px" v-on:click='prev'>
             <span class="roboto-semi-bold-oxford-blue-14px">Prev</span>
-          </button>
+          </div>
         </div>
         <div class="button">
-          <div class="text-1 roboto-semi-bold-oxford-blue-14px">
+          <div class="text-1 roboto-semi-bold-oxford-blue-14px" @click='next'>
             <span class="roboto-semi-bold-oxford-blue-14px">Next</span>
           </div>
         </div>
       </div>
+
+      <div class="first-button button">
+        <div class="text-1 roboto-semi-bold-oxford-blue-14px" v-on:click='home'>
+          <span class="roboto-semi-bold-oxford-blue-14px">Home</span>
+        </div>
+      </div>
     </div>
+
   </div>
 </template>
 
 <script>
+
+import { mapGetters, mapActions } from 'vuex'
+import * as type from './type';
+
 export default {
   name: "Genesis",
-  props: ["line1", "spanText1", "spanText2", "helpIcon", "spanText3"],
-  method: {
+
+  data() {
+    return {
+      // ocrData: []
+    };
+  },
+
+  computed: {
+    ...mapGetters({
+      count: 'count',
+      ocrData: 'ocrData',
+      stakingData: 'stakingData'
+    })
+  },
+
+  methods: {
     prev() {
-
+      let count = this.$store.getters.count;
+      if (count > 1)
+        this.$store.dispatch('setCount', count - 1);
     },
-    after() {
 
+    next() {
+      //alert("next");
+      let count = this.$store.getters.count;
+      if (count < 4)
+        this.$store.dispatch('setCount', count + 1);
     },
+
     create() {
+      ///alert("create");
+      let count = this.$store.getters.count;
+      if (count == 1)
+        this.$store.dispatch('setCount', 2);
+    },
 
+    ocr() {
+      ///alert("create");
+      let count = this.$store.getters.count;
+      if (count == 2) {
+        this.$store.dispatch('setCount', 3);
+        let ocrData = [];
+        for (let i = 1; i <= 4; i++) {
+          let value = Math.floor(Math.random() * (10)) + 1;
+          ocrData.push(value);
+        }
+        console.log(ocrData);
+        this.$store.dispatch('setOcrData', ocrData);
+      }
+    },
+
+    ocrConfirm() {
+      console.log(this.$store.getters.ocrData);
+      let count = this.$store.getters.count;
+      if (count == 3) {
+        this.$store.dispatch('setCount', 4);
+      }
+    },
+
+    stakingOk() {
+      let count = this.$store.getters.count;
+      if (count == 4) {
+        {
+          let list = this.$store.getters.stakingData;
+          console.log(list);
+          list.push(this.$store.getters.ocrData);
+          this.$store.dispatch('setstakingData', list);
+          console.log(this.stakingData);
+        }
+      }
+    },
+
+    lastConfirm() {
+
+    },
+
+    home() {
+      ///alert("create");
+      this.$store.dispatch('setCount', 1);
     }
   }
 };
