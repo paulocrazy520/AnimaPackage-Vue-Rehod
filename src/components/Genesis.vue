@@ -183,7 +183,7 @@
           </div>
         </div>
         <div class="lastDiv" v-if="count == 4">
-          <input id="staking" class="stakingInput" />
+          <input id="staking" class="stakingInput" v-model.lazy="stakingValue" placeholder="Staking..." />
           <div class="button">
             <div class="text-1 roboto-semi-bold-oxford-blue-14px" @click='stakingOk'>
               <span class="roboto-semi-bold-oxford-blue-14px">Confirm</span>
@@ -225,8 +225,14 @@ export default {
 
   data() {
     return {
-      // ocrData: []
+      stakingValue: ''
     };
+  },
+
+  watch: {
+    stakingValue: function (value) {
+      return value;
+    }
   },
 
   computed: {
@@ -285,8 +291,11 @@ export default {
       let count = this.$store.getters.count;
       if (count == 4) {
         {
+          console.log(this.stakingValue);
+
           let list = this.$store.getters.stakingData;
-          console.log(list);
+          this.$store.getters.ocrData["staking"] = this.stakingValue;
+
           list.push(this.$store.getters.ocrData);
           this.$store.dispatch('setstakingData', list);
           console.log(this.stakingData);
